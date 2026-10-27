@@ -1,0 +1,10 @@
+{
+  "name": "oneplusone-web",
+  "private": true,
+  "description": "Public pages for oneplusone.dating",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "preview": "node preview.mjs"
+  }
+}
