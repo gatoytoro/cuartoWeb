@@ -41,7 +41,7 @@ Selfie verification is part of the design for First Light and Early Risers. The 
 
 ## Purchases
 
-The membership design includes a complimentary First Light place, a one-time $10 Early Risers purchase, and a $7 monthly subscription with no free trial. The finished policy has to describe purchase records held by OnePlusOne and by Apple or Google. This draft does not claim that billing is already available.
+The membership design includes a complimentary First Light place, a one-time {{early_risers_price}} Early Risers purchase, and a {{member_price}} monthly subscription with no free trial. The finished policy has to describe purchase records held by OnePlusOne and by Apple or Google. This draft does not claim that billing is already available.
 
 ## Diagnostics
 

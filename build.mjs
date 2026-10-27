@@ -1,6 +1,12 @@
+import { execFile } from "node:child_process";
 import { mkdir, readFile, readdir, rm, writeFile, cp } from "node:fs/promises";
+import { promisify } from "node:util";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { sunriseSvg } from "./assets/sunrise.mjs";
+
+const run = promisify(execFile);
 
 const root = dirname(fileURLToPath(import.meta.url));
 const contentDir = join(root, "content");
@@ -19,7 +25,16 @@ const REQUIRED = [
   "contact",
 ];
 
-const PRIMARY = ["about", "mission", "guidelines", "help"];
+const PRIMARY = [
+  ["about", "About"],
+  ["/#membership", "Membership"],
+  ["safety", "Safety"],
+  ["help", "Help"],
+];
+
+const POLICY = new Set(["guidelines", "terms", "privacy", "delete-account"]);
+const HAND = new Set(["help", "safety", "delete-account"]);
+const HOME_SECTIONS = ["mission", "membership", "who-can-join", "safety", "launch-news"];
 
 const MONTHS = [
   "January",
@@ -118,7 +133,8 @@ function renderBlocks(body) {
       continue;
     }
     if (line.startsWith("### ")) {
-      blocks.push({ type: "h3", html: `<h3>${inline(line.slice(4).trim())}</h3>` });
+      const text = line.slice(4).trim();
+      blocks.push({ type: "h3", text, html: `<h3>${inline(text)}</h3>` });
       i += 1;
       continue;
     }
@@ -128,7 +144,7 @@ function renderBlocks(body) {
       let n = 2;
       while (ids.has(id)) id = `${slugify(text)}-${n++}`;
       ids.add(id);
-      blocks.push({ type: "h2", id, html: `<h2>${inline(text)}</h2>` });
+      blocks.push({ type: "h2", id, text, html: `<h2>${inline(text)}</h2>` });
       i += 1;
       continue;
     }
@@ -166,14 +182,14 @@ function renderBlocks(body) {
     const warning = text.startsWith("**IMPORTANT:**") || text.startsWith("IMPORTANT:");
     blocks.push({
       type: "p",
-      html: `<p${warning ? ' class="warning"' : ""}>${inline(text)}</p>`,
+      html: `<p${warning ? ' class="warning"' : ""}>${warning ? '<span class="warning-mark" aria-hidden="true">!</span>' : ""}${inline(text)}</p>`,
     });
   }
   return blocks;
 }
 
-function assemble(blocks, help) {
-  if (!help) return blocks.map((block) => block.html).join("\n");
+function assemble(blocks, sections) {
+  if (!sections) return blocks.map((block) => block.html).join("\n");
   let html = "";
   let i = 0;
   while (i < blocks.length && blocks[i].type !== "h2") html += `${blocks[i++].html}\n`;
@@ -181,7 +197,7 @@ function assemble(blocks, help) {
     const head = blocks[i++];
     let inner = head.html;
     while (i < blocks.length && blocks[i].type !== "h2") inner += blocks[i++].html;
-    html += `<section id="${head.id}" data-help-section>${inner}</section>\n`;
+    html += `<section class="text-card" id="${head.id}" data-help-section>${inner}</section>\n`;
   }
   return html;
 }
@@ -198,111 +214,271 @@ function hrefFor(slug) {
   return slug === "home" ? "/" : `/${slug}`;
 }
 
-function pageHtml(page, pages) {
-  const path = hrefFor(page.slug);
-  const canonical = `https://oneplusone.dating${path}`;
-  const docTitle =
-    page.slug === "home"
-      ? "OnePlusOne — Dating, without the parenting part."
-      : `${page.title} — OnePlusOne`;
-  const statusLabel = page.status === "draft" ? "Draft" : "Published";
-  const kicker = page.status === "draft" ? "Draft for review" : "OnePlusOne";
-  const primary = PRIMARY.map((slug) => pages.find((item) => item.slug === slug));
-  const nav = (items, label) =>
-    `<nav aria-label="${label}">${items
-      .map(
-        (item) =>
-          `<a href="${hrefFor(item.slug)}"${item.slug === page.slug ? ' aria-current="page"' : ""}>${escapeHtml(item.navLabel)}</a>`,
-      )
-      .join("")}</nav>`;
+function wordmark(onDark) {
+  return `<span class="wordmark${onDark ? " on-dark" : ""}">OnePlus<span class="one">One</span></span>`;
+}
 
-  const helpSearch =
-    page.slug === "help"
-      ? `<form class="help-search" role="search" action="/help" method="get">
-          <label for="help-q">Search help</label>
-          <input id="help-q" name="q" type="search" placeholder="Eligibility, First Light, subscription" enterkeyhint="search">
-        </form>
-        <p id="help-empty" class="help-empty" hidden>Nothing on this page matches that search.</p>`
-      : "";
+function arc(fillClass) {
+  return `<svg class="arc ${fillClass}" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64 Q600 0 1200 64 V64 H0 Z"/></svg>`;
+}
 
-  const cards =
-    page.slug === "home"
-      ? `<div class="cards">${pages
-          .filter((item) => item.slug !== "home")
-          .map(
-            (item) => `<a class="card" href="${hrefFor(item.slug)}">
-              <strong>${escapeHtml(item.navLabel)}</strong>
-              <span>${escapeHtml(item.summary)}</span>
-            </a>`,
-          )
-          .join("")}</div>`
-      : "";
+function navLinks(current) {
+  return PRIMARY.map(([href, label]) => {
+    const path = href.startsWith("/") ? href : `/${href}`;
+    const slug = href.split("#")[0];
+    const here = slug === current;
+    return `<a href="${href.startsWith("/") ? href : path}"${here ? ' aria-current="page"' : ""}>${label}</a>`;
+  }).join("");
+}
 
-  const articleInner = `<p class="kicker">${escapeHtml(kicker)}</p>
-        <h1>${escapeHtml(page.title)}</h1>
-        ${
-          page.slug === "home"
-            ? `<p class="tagline">${escapeHtml(page.description)}</p>`
-            : ""
-        }
-        <p class="meta">Version ${escapeHtml(page.version)} · ${escapeHtml(page.publishedLabel)} · ${statusLabel}</p>
-        ${helpSearch}
-        <div class="prose">${page.html}</div>`;
-
-  const main =
-    page.slug === "home"
-      ? `<header class="hero">${articleInner}</header>\n      ${cards}`
-      : `<article class="panel">${articleInner}</article>`;
-
+function shell({ slug, title, description, main, status = "published", canonicalPath = "/" }) {
+  const docTitle = slug === "home" ? "OnePlusOne — Dating, without the parenting part." : `${title} — OnePlusOne`;
+  const canonical = `https://oneplusone.dating${canonicalPath === "/" ? "/" : canonicalPath}`;
+  const launchHref = slug === "home" ? "#launch" : "/#launch";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(docTitle)}</title>
-  <meta name="description" content="${escapeHtml(page.description)}">
+  <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonical}">
   <meta property="og:title" content="${escapeHtml(docTitle)}">
-  <meta property="og:description" content="${escapeHtml(page.description)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="https://oneplusone.dating/assets/og.png">
   <meta name="theme-color" content="#FBF6EF">
   <link rel="icon" href="/assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="stylesheet" href="/assets/site.css">
 </head>
-<body class="page-${page.slug}${page.status === "draft" ? " is-draft" : ""}">
+<body class="page-${slug}${status === "draft" ? " is-draft" : ""}">
   <a class="skip" href="#content">Skip to content</a>
-  <div class="wrap">
-    <header class="site-header">
-      <a class="brand" href="/">
-        <img src="/assets/mark.png" alt="" width="556" height="410">
-        <span>OnePlusOne</span>
-      </a>
-      ${nav(primary, "Primary")}
-    </header>
-    <main id="content">
-      ${main}
-    </main>
-    <footer class="site-footer">
-      ${nav(pages, "All pages")}
-      <p>The iOS and Android apps are in development.</p>
-      <p>Dating, without the parenting part.</p>
-    </footer>
+  <div class="sky">
+    <div class="wrap">
+      <header class="site-header">
+        <a class="brand" href="/">
+          ${sunriseSvg(86, { id: `${slug}-mark` })}
+          ${wordmark(false)}
+        </a>
+        <nav aria-label="Primary">
+          ${navLinks(slug)}
+          <a class="button" href="${launchHref}">Get launch news</a>
+        </nav>
+      </header>
+    </div>
+    ${main}
   </div>
-  ${page.slug === "help" ? '<script src="/assets/site.js"></script>' : ""}
+  ${arc("to-horizon")}
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div>
+        <a class="brand" href="/">${sunriseSvg(86, { id: `${slug}-foot`, horizon: "#FBF6EF" })}${wordmark(true)}</a>
+        <p>Dating, without the parenting part.</p>
+      </div>
+      <div><h2>Company</h2><ul><li><a href="/about">About</a></li><li><a href="/mission">Our Mission</a></li></ul></div>
+      <div><h2>Community</h2><ul><li><a href="/guidelines">Guidelines</a></li><li><a href="/safety">Safety</a></li><li><a href="/help#who-can-join">Who can join</a></li></ul></div>
+      <div><h2>Support</h2><ul><li><a href="/help">Help</a></li><li><a href="/contact">Contact</a></li><li><a href="/delete-account">Delete account</a></li></ul></div>
+      <div><h2>Legal</h2><ul><li><a href="/terms">Terms</a></li><li><a href="/privacy">Privacy</a></li></ul></div>
+    </div>
+    <div class="wrap"><p class="footer-note">The iOS and Android apps are in development.</p></div>
+  </footer>
+  <script type="module" src="/assets/site.js"></script>
 </body>
 </html>
 `;
 }
 
+function groupSections(blocks) {
+  const sections = [];
+  let section = null;
+  let card = null;
+  for (const block of blocks) {
+    if (block.type === "h2") {
+      card = null;
+      section = { id: block.id, title: block.text, html: "", cards: [] };
+      sections.push(section);
+    } else if (block.type === "h3" && section) {
+      card = { title: block.text, html: "" };
+      section.cards.push(card);
+    } else if (card) {
+      card.html += block.html;
+    } else if (section) {
+      section.html += block.html;
+    }
+  }
+  return sections;
+}
+
+function promote(section) {
+  const match = section.html.match(/^<p>([\s\S]*?)<\/p>/);
+  if (!match) return { title: section.title, html: section.html };
+  return { title: match[1].replace(/<[^>]+>/g, ""), html: section.html.slice(match[0].length) };
+}
+
+function homeMain(page, facts) {
+  const byId = Object.fromEntries(groupSections(page.blocks).map((section) => [section.id, section]));
+  for (const id of HOME_SECTIONS) {
+    if (!byId[id]) throw new Error(`home is missing ## ${id}`);
+  }
+  const mission = { ...promote(byId.mission), cards: byId.mission.cards };
+  const membership = promote(byId.membership);
+  const join = promote(byId["who-can-join"]);
+  const launch = promote(byId["launch-news"]);
+  const cards = mission.cards
+    .map(
+      (card) => `<article class="value"><h3>${escapeHtml(card.title)}</h3>${card.html}</article>`,
+    )
+    .join("");
+  return `<main id="content">
+    <div class="wrap hero">
+      <p class="pill">The iOS and Android apps are in development</p>
+      <div class="hero-mark" data-sunrise-spin data-width="380" data-sun-id="hero-sun">${sunriseSvg(380, { glow: true, id: "hero-sun" })}</div>
+      <h1>Dating, without the <em>parenting part.</em></h1>
+      <p class="lede">A dating space for adults without children. One person. Another person. A possibility.</p>
+      <div class="hero-actions">
+        <a class="button" href="#launch">Get launch news</a>
+        <a class="button ghost" href="#who-can-join">Who can join?</a>
+      </div>
+    </div>
+    ${arc("")}
+    <div class="surface">
+      <section class="section" id="mission"><div class="wrap">
+        <div class="mission-grid">
+          <div>
+            <p class="kicker">Mission</p>
+            <h2>${mission.title}</h2>
+          </div>
+          <div>${mission.html}</div>
+        </div>
+        <div class="values">${cards}</div>
+      </div></section>
+      <section class="section" id="membership"><div class="wrap">
+        <h2>${membership.title}</h2>
+        ${membership.html}
+        <div class="tiers">
+          <article class="tier featured">
+            <span class="badge">First ${escapeHtml(facts.first_light_cap)} per city</span>
+            <h3>First Light</h3>
+            <p class="price">Complimentary</p>
+            <p>For the life of your account. No monthly fee.</p>
+          </article>
+          <article class="tier">
+            <h3>Early Risers</h3>
+            <p class="price">${escapeHtml(facts.early_risers_price)} <span>once</span></p>
+            <p>The next ${escapeHtml(facts.early_risers_cap)} eligible members in your launch city.</p>
+          </article>
+          <article class="tier">
+            <h3>Members</h3>
+            <p class="price">${escapeHtml(facts.member_price)} <span>/ month</span></p>
+            <p>${escapeHtml(facts.trial)}</p>
+          </article>
+        </div>
+        <p class="fine">A First Light or Early Risers benefit is permanently forfeited if you delete your account. Purchases are subject to store policies and applicable law. Deleting your account does not cancel an App Store or Google Play subscription.</p>
+      </div></section>
+      <section class="section" id="who-can-join"><div class="wrap"><div class="join-panel">
+        <h2>${join.title}</h2>
+        ${join.html}
+      </div></div></section>
+      <section class="section sand" id="safety"><div class="wrap">
+        <h2>${escapeHtml(byId.safety.title)}</h2>
+        <div class="safety-points">${safetyCards(byId.safety.html)}</div>
+      </div></section>
+      <section class="section" id="launch"><div class="wrap"><div class="launch">
+        <h2>${launch.title}</h2>
+        ${launch.html}
+        <form class="launch-form">
+          <label class="skip" for="launch-email">Email</label>
+          <input id="launch-email" type="email" name="email" placeholder="you@example.com" disabled>
+          <button class="button" type="button" disabled>Notify me</button>
+        </form>
+        <p class="fine">Launch news is not being collected yet. When it is, we will only use your email to say when OnePlusOne opens in your city.</p>
+        <p class="pills"><span>App Store · coming soon</span><span>Google Play · coming soon</span></p>
+      </div></div></section>
+    </div>
+  </main>`;
+}
+
+function contentMain(page) {
+  const headings = page.blocks.filter((block) => block.type === "h2");
+  const toc = headings
+    .map((block) => `<a href="#${block.id}">${escapeHtml(block.text)}</a>`)
+    .join("");
+  const search =
+    page.slug === "help"
+      ? `<form class="help-search" role="search" action="/help" method="get"><label for="help-q">Search help</label><input id="help-q" name="q" type="search" placeholder="Eligibility, First Light, subscription" enterkeyhint="search"></form><p id="help-empty" class="help-empty" hidden>Nothing on this page matches that search.</p>`
+      : "";
+  const meta = POLICY.has(page.slug)
+    ? `<p class="meta">Version ${escapeHtml(page.version)} · ${escapeHtml(page.publishedLabel)} · ${page.status === "draft" ? "Draft" : "Published"}</p>`
+    : "";
+  const hand = HAND.has(page.slug)
+    ? `<aside class="hand"><h2>Still need a hand?</h2><p>Our support team replies by email. <a href="/contact">Contact</a></p></aside>`
+    : "";
+  return `<main id="content">
+    <div class="wrap band">
+      ${sunriseSvg(120, { id: `${page.slug}-band` })}
+      <p class="kicker">${page.status === "draft" ? "Draft for review" : "OnePlusOne"}</p>
+      <h1>${escapeHtml(page.title)}</h1>
+      <p class="lead">${escapeHtml(page.description)}</p>
+      ${search}
+    </div>
+    ${arc("")}
+    <div class="wrap content-layout">
+      <nav class="toc" aria-label="On this page"><p>On this page</p>${toc}</nav>
+      <div>
+        <div class="prose">${page.html}</div>
+        ${meta}
+        ${hand}
+      </div>
+    </div>
+  </main>`;
+}
+
+function pageHtml(page, facts) {
+  const main = page.slug === "home" ? homeMain(page, facts) : contentMain(page);
+  return shell({
+    slug: page.slug,
+    title: page.title,
+    description: page.description,
+    status: page.status,
+    canonicalPath: hrefFor(page.slug),
+    main,
+  });
+}
+
+function safetyCards(html) {
+  const points = [...html.matchAll(/<p>[\s\S]*?<\/p>/g)].map((match) => match[0]);
+  const rest = points.pop() || "";
+  return `${points.map((point) => `<article>${point}</article>`).join("")}${rest}`;
+}
+
+function fillFacts(body, facts) {
+  return body.replace(/\{\{([a-z_]+)\}\}/g, (match, key) => {
+    if (!(key in facts)) throw new Error(`unknown membership token ${match}`);
+    return facts[key];
+  });
+}
+
+const NUMBER_LEAK = /\b50\b|\b150\b|\$10|\$7/;
+
 function collectLinks(body) {
   return [...body.matchAll(/\[[^\]]+\]\(([^)\s]+)\)/g)].map((match) => match[1]);
+}
+
+const facts = JSON.parse(await readFile(join(contentDir, "membership.json"), "utf8"));
+for (const key of ["first_light_cap", "early_risers_cap", "early_risers_price", "member_price", "trial", "renewal"]) {
+  if (!facts[key]) throw new Error(`membership.json missing ${key}`);
 }
 
 const files = (await readdir(contentDir)).filter((name) => name.endsWith(".md")).sort();
 const pages = [];
 for (const file of files) {
-  const { meta, body } = parseFile(await readFile(join(contentDir, file), "utf8"), file);
+  const raw = await readFile(join(contentDir, file), "utf8");
+  if (NUMBER_LEAK.test(raw)) throw new Error(`${file}: membership numbers belong in membership.json`);
+  const { meta, body: source } = parseFile(raw, file);
+  const body = fillFacts(source, facts);
+  if (body.includes("{{")) throw new Error(`${file}: unfilled membership token`);
   for (const key of ["slug", "version", "published_at", "locale", "title", "status", "description", "summary"]) {
     if (!meta[key]) throw new Error(`${file}: missing ${key}`);
   }
@@ -315,7 +491,7 @@ for (const file of files) {
     ...meta,
     body,
     blocks,
-    html: assemble(blocks, meta.slug === "help"),
+    html: assemble(blocks, meta.slug !== "home"),
     publishedLabel: formatDate(meta.published_at),
     navLabel: meta.slug === "home" ? "Home" : meta.title,
   });
@@ -359,7 +535,7 @@ await mkdir(join(distDir, "content"), { recursive: true });
 await mkdir(join(distDir, "assets", "fonts"), { recursive: true });
 
 for (const page of ordered) {
-  const html = pageHtml(page, ordered);
+  const html = pageHtml(page, facts);
   if (page.slug === "home") {
     await writeFile(join(distDir, "index.html"), html);
   } else {
@@ -398,11 +574,51 @@ await writeFile(
   )}\n`,
 );
 
-await writeFile(join(distDir, "robots.txt"), "User-agent: *\nAllow: /\n");
+const missing = shell({
+  slug: "missing",
+  title: "That page has set",
+  description: "That page has set.",
+  canonicalPath: "/",
+  main: `<main id="content" class="not-found"><div class="wrap band">
+    <div class="mark-set">${sunriseSvg(160, { id: "missing-sun" })}</div>
+    <h1>That page has set</h1>
+    <p class="lead">The page you asked for is not here.</p>
+    <p class="hero-actions"><a class="button" href="/">Home</a><a class="button ghost" href="/help">Help</a></p>
+  </div></main>`,
+});
+await writeFile(join(distDir, "404.html"), missing);
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${ordered
+  .map(
+    (page) => `  <url><loc>https://oneplusone.dating${hrefFor(page.slug)}</loc><lastmod>${page.published_at}</lastmod></url>`,
+  )
+  .join("\n")}
+</urlset>
+`;
+await writeFile(join(distDir, "sitemap.xml"), sitemap);
+await writeFile(join(distDir, "robots.txt"), "User-agent: *\nAllow: /\nSitemap: https://oneplusone.dating/sitemap.xml\n");
+await writeFile(
+  join(distDir, "_headers"),
+  `/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'
+
+/assets/*
+  Cache-Control: public, max-age=604800
+`,
+);
+await writeFile(join(distDir, "_redirects"), "/delete /delete-account 301\n");
+
 await cp(join(root, "assets", "site.css"), join(distDir, "assets", "site.css"));
 await cp(join(root, "assets", "site.js"), join(distDir, "assets", "site.js"));
-await cp(join(root, "assets", "mark.png"), join(distDir, "assets", "mark.png"));
-await cp(join(root, "assets", "favicon.png"), join(distDir, "assets", "favicon.png"));
+await cp(join(root, "assets", "sunrise.mjs"), join(distDir, "assets", "sunrise.mjs"));
+await run("python", [join(root, "assets", "raster_marks.py"), join(distDir, "assets")], { windowsHide: true });
 for (const font of ["dm-sans-latin.woff2", "fraunces-latin.woff2", "fraunces-latin-italic.woff2"]) {
   await cp(join(root, "assets", "fonts", font), join(distDir, "assets", "fonts", font));
 }

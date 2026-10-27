@@ -1,3 +1,9 @@
+import { mountSunrise } from "./sunrise.mjs";
+
+for (const mark of document.querySelectorAll("[data-sunrise-spin]")) {
+  mountSunrise(mark);
+}
+
 const input = document.querySelector("#help-q");
 if (input) {
   const sections = [...document.querySelectorAll("[data-help-section]")];

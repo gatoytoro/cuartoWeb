@@ -1,7 +1,7 @@
 ---
 slug: terms
-version: 2026-10-26.1
-published_at: 2026-10-26
+version: 2026-10-27.1
+published_at: 2026-10-27
 locale: en
 title: Terms of Service (draft)
 status: draft
@@ -27,11 +27,11 @@ Be truthful about eligibility. Use accurate age, photos and profile details.
 
 ## Membership in a launch city
 
-First Light is for the first 50 eligible verified members in a launch city. Membership is complimentary for the life of that account. There is no monthly membership fee. The benefit ends if the account is deleted or terminated under the Terms.
+First Light is for the first {{first_light_cap}} eligible verified members in a launch city. Membership is complimentary for the life of that account. There is no monthly membership fee. The benefit ends if the account is deleted or terminated under the Terms.
 
-Early Risers is a one-time $10 purchase for the next 150 eligible members in that launch city after First Light. Membership lasts for the life of the account, without a recurring membership fee. If the account is deleted, this benefit is permanently forfeited. Purchases are subject to store policies and applicable law.
+Early Risers is a one-time {{early_risers_price}} purchase for the next {{early_risers_cap}} eligible members in that launch city after First Light. Membership lasts for the life of the account, without a recurring membership fee. If the account is deleted, this benefit is permanently forfeited. Purchases are subject to store policies and applicable law.
 
-After those places, membership is $7 per month. The subscription renews automatically until it is canceled through the app store. There is no free trial.
+After those places, membership is {{member_price}} per month. {{renewal}} {{trial}}
 
 A First Light or Early Risers benefit is forfeited permanently when the account is deleted. It is not restored automatically on a new account. The same forfeiture applies if the account is terminated under the Terms.
 

@@ -1,11 +1,11 @@
 ---
 slug: help
-version: 2026-10-26.1
-published_at: 2026-10-26
 locale: en
-title: Help
+title: How can we help?
 status: published
 description: Eligibility, membership, and subscription cancellation.
+version: 2026-10-27.1
+published_at: 2026-10-27
 summary: Eligibility, membership, and cancellation.
 ---
 
@@ -27,39 +27,25 @@ The confirmation in registration reads:
 
 You are among the first.
 
-Welcome to First Light. As one of the first 50 eligible verified members in your launch city, your membership is complimentary for the life of your account. No monthly membership fee.
+Welcome to First Light. As one of the first {{first_light_cap}} eligible verified members in your launch city, your membership is complimentary for the life of your account. No monthly membership fee.
 
 Your benefit ends if you delete your account or your account is terminated under our Terms.
-
-In the app, that screen includes:
-
-- Start discovering
 
 ## Early Risers
 
 You are early. And that matters.
 
-Become an Early Riser for a one-time $10 purchase. Available to the next 150 eligible members in your launch city after First Light. Enjoy membership for the life of your account, without a recurring membership fee.
+Become an Early Riser for a one-time {{early_risers_price}} purchase. Available to the next {{early_risers_cap}} eligible members in your launch city after First Light. Enjoy membership for the life of your account, without a recurring membership fee.
 
 If you delete your account, this benefit is permanently forfeited. Purchases are subject to store policies and applicable law.
-
-In the app, that screen includes:
-
-- Become an Early Riser — $10
-- Restore purchases
 
 ## Membership
 
 Good connections start somewhere.
 
-Join OnePlusOne for $7 per month. Discover people without children, match when interest is mutual, and start conversations.
+Join OnePlusOne for {{member_price}} per month. Discover people without children, match when interest is mutual, and start conversations.
 
-This subscription renews automatically until canceled through your app store. There is no free trial.
-
-In the app, that screen includes:
-
-- Continue — $7/month
-- Restore purchases
+{{renewal}} {{trial}}
 
 ## Canceling a subscription
 
