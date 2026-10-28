@@ -413,10 +413,10 @@ function contentMain(page) {
   const hand = HAND.has(page.slug)
     ? `<aside class="hand"><h2>Still need a hand?</h2><p>Our support team replies by email. <a href="/contact">Contact</a></p></aside>`
     : "";
+  const kicker = page.status === "draft" ? `<p class="kicker">Draft for review</p>` : "";
   return `<main id="content">
     <div class="wrap band">
-      ${sunriseSvg(120, { id: `${page.slug}-band` })}
-      <p class="kicker">${page.status === "draft" ? "Draft for review" : "OnePlusOne"}</p>
+      ${kicker}
       <h1>${escapeHtml(page.title)}</h1>
       <p class="lead">${escapeHtml(page.description)}</p>
       ${search}
