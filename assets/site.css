@@ -206,10 +206,8 @@ body {
   display: block;
   width: 100%;
   height: 64px;
-  color: var(--surface);
+  margin-bottom: -1px;
 }
-.arc path { fill: currentColor; }
-.arc.to-horizon { color: var(--horizon); display: block; margin-bottom: -1px; }
 
 .band { padding: 18px 0 8px; }
 .band .sunrise { width: 120px; height: auto; }

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, rm, writeFile, cp } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -5,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { sunriseSvg } from "./assets/sunrise.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
+let assetQuery = "";
 const contentDir = join(root, "content");
 const distDir = join(root, "dist");
 
@@ -214,8 +216,8 @@ function wordmark(onDark) {
   return `<span class="wordmark${onDark ? " on-dark" : ""}">OnePlus<span class="one">One</span></span>`;
 }
 
-function arc(fillClass) {
-  return `<svg class="arc ${fillClass}" viewBox="0 0 1200 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64 Q600 0 1200 64 V64 H0 Z"/></svg>`;
+function arc(fill) {
+  return `<svg class="arc" viewBox="0 0 1200 64" width="1200" height="64" preserveAspectRatio="none" aria-hidden="true"><path fill="${fill}" d="M0 64 Q600 0 1200 64 V64 H0 Z"/></svg>`;
 }
 
 function navLinks(current) {
@@ -247,7 +249,7 @@ function shell({ slug, title, description, main, status = "published", canonical
   <meta name="theme-color" content="#FBF6EF">
   <link rel="icon" href="/assets/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/site.css?v=${assetQuery}">
 </head>
 <body class="page-${slug}${status === "draft" ? " is-draft" : ""}">
   <a class="skip" href="#content">Skip to content</a>
@@ -266,7 +268,7 @@ function shell({ slug, title, description, main, status = "published", canonical
     </div>
     ${main}
   </div>
-  ${arc("to-horizon")}
+  ${arc("#262C34")}
   <footer class="site-footer">
     <div class="wrap footer-grid">
       <div>
@@ -280,7 +282,7 @@ function shell({ slug, title, description, main, status = "published", canonical
     </div>
     <div class="wrap"><p class="footer-note">The iOS and Android apps are in development.</p></div>
   </footer>
-  <script type="module" src="/assets/site.js"></script>
+  <script type="module" src="/assets/site.js?v=${assetQuery}"></script>
 </body>
 </html>
 `;
@@ -338,7 +340,7 @@ function homeMain(page, facts) {
         <a class="button ghost" href="#who-can-join">Who can join?</a>
       </div>
     </div>
-    ${arc("")}
+    ${arc("#FFFCF8")}
     <div class="surface">
       <section class="section" id="mission"><div class="wrap">
         <div class="mission-grid">
@@ -419,7 +421,7 @@ function contentMain(page) {
       <p class="lead">${escapeHtml(page.description)}</p>
       ${search}
     </div>
-    ${arc("")}
+    ${arc("#FFFCF8")}
     <div class="wrap content-layout">
       <nav class="toc" aria-label="On this page"><p>On this page</p>${toc}</nav>
       <div>
@@ -529,6 +531,10 @@ const ordered = REQUIRED.map((slug) => bySlug[slug]);
 await rm(distDir, { recursive: true, force: true });
 await mkdir(join(distDir, "content"), { recursive: true });
 await mkdir(join(distDir, "assets", "fonts"), { recursive: true });
+
+const cssBytes = await readFile(join(root, "assets", "site.css"));
+const jsBytes = await readFile(join(root, "assets", "site.js"));
+assetQuery = createHash("sha256").update(cssBytes).update(jsBytes).digest("hex").slice(0, 10);
 
 for (const page of ordered) {
   const html = pageHtml(page, facts);
