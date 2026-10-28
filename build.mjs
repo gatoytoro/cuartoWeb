@@ -1,12 +1,8 @@
-import { execFile } from "node:child_process";
 import { mkdir, readFile, readdir, rm, writeFile, cp } from "node:fs/promises";
-import { promisify } from "node:util";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { sunriseSvg } from "./assets/sunrise.mjs";
-
-const run = promisify(execFile);
 
 const root = dirname(fileURLToPath(import.meta.url));
 const contentDir = join(root, "content");
@@ -618,7 +614,9 @@ await writeFile(join(distDir, "_redirects"), "/delete /delete-account 301\n");
 await cp(join(root, "assets", "site.css"), join(distDir, "assets", "site.css"));
 await cp(join(root, "assets", "site.js"), join(distDir, "assets", "site.js"));
 await cp(join(root, "assets", "sunrise.mjs"), join(distDir, "assets", "sunrise.mjs"));
-await run("python", [join(root, "assets", "raster_marks.py"), join(distDir, "assets")], { windowsHide: true });
+for (const image of ["favicon.png", "apple-touch-icon.png", "og.png"]) {
+  await cp(join(root, "assets", image), join(distDir, "assets", image));
+}
 for (const font of ["dm-sans-latin.woff2", "fraunces-latin.woff2", "fraunces-latin-italic.woff2"]) {
   await cp(join(root, "assets", "fonts", font), join(distDir, "assets", "fonts", font));
 }
