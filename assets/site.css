@@ -271,14 +271,20 @@ body {
   gap: 16px;
   margin-top: 28px;
 }
-.tier { background: var(--surface); border-radius: 32px; }
+.tier {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 32px;
+}
 .tier.featured {
   background: linear-gradient(180deg, var(--peach), var(--apricot));
   box-shadow: var(--shadow-feature);
 }
 .tier .badge {
   display: inline-block;
-  margin-bottom: 10px;
+  align-self: flex-start;
+  margin-top: auto;
   padding: 4px 10px;
   border-radius: 999px;
   background: white;
@@ -308,6 +314,15 @@ body {
   border-radius: 28px;
   padding: 20px;
 }
+.safety-points h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  color: var(--heading);
+}
+.safety-points p { margin: 0; }
 
 .join-panel, .launch {
   background: var(--surface);
@@ -352,7 +367,9 @@ body {
 .toc { display: flex; flex-direction: column; gap: 8px; }
 .toc p { margin: 0 0 6px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ember); }
 .toc a { color: var(--soft); text-decoration: none; font-weight: 600; }
-.text-card a, .prose a, .join-panel a, .safety-points a { color: var(--ember); font-weight: 700; }
+.text-card + .text-card { margin-top: 16px; }
+.text-card a, .prose a, .join-panel a, .safety-points a, .safety-note a { color: var(--ember); font-weight: 700; }
+.safety-note { margin-top: 16px; }
 
 .banner, .quote, .warning {
   margin: 0 0 1rem;
@@ -431,8 +448,12 @@ body {
 .footer-note { margin: 28px 0 0; color: rgba(251, 246, 239, 0.78); }
 
 .not-found { text-align: center; padding-bottom: 20px; }
-.not-found .sunrise { margin-top: 12px; }
-.mark-set { transform: translateY(36px); }
+.not-found .mark-set {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 28px;
+}
+.not-found .sunrise { display: block; margin: 0; }
 
 .sunrise-glow { animation: breath 2.4s ease-in-out infinite alternate; }
 @keyframes breath {

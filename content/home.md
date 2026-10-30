@@ -1,7 +1,7 @@
 ---
 slug: home
-version: 2026-10-27.1
-published_at: 2026-10-27
+version: 2026-10-29.1
+published_at: 2026-10-29
 locale: en
 title: OnePlusOne
 status: published
@@ -15,7 +15,7 @@ To make meaningful dating simpler for adults without children.
 
 We create a welcoming space where adults without children can meet, connect and build relationships without uncertainty about whether a potential match is already a parent.
 
-Having no children is what brings our community together. It is not what defines us.
+You do not have to explain that part of your life before a conversation can start.
 
 ### Common ground, not a label
 
@@ -45,9 +45,15 @@ The full rule is on [Help](/help#who-can-join).
 
 ## Safety
 
+### Adults only in photos
+
 Only adults may appear in profile photos. No images featuring children, nudity or images used without permission.
 
+### Respect
+
 No harassment, threats, stalking, discriminatory abuse or unwanted sexual content.
+
+### Report and block
 
 Report concerns through in-app reporting and block tools. Reports are reviewed; violations may lead to restrictions or removal.
 

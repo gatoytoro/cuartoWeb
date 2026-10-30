@@ -4,12 +4,10 @@ locale: en
 title: How can we help?
 status: published
 description: Eligibility, membership, and subscription cancellation.
-version: 2026-10-27.1
-published_at: 2026-10-27
+version: 2026-10-29.1
+published_at: 2026-10-29
 summary: Eligibility, membership, and cancellation.
 ---
-
-Answers drawn from the membership rules already decided for OnePlusOne.
 
 ## Who can join?
 
@@ -21,7 +19,7 @@ Members may or may not want children in the future. This does not affect eligibi
 
 The confirmation in registration reads:
 
-> I confirm that I meet OnePlusOne's no-children membership requirements, including having no living biological children or living children adopted as my own, except for permitted family caregiving arrangements. [Who can join?](/help#who-can-join)
+> I confirm that I meet OnePlusOne's no-children membership requirements, including having no living biological children or living children adopted as my own, except for permitted family caregiving arrangements.
 
 ## First Light
 
@@ -39,7 +37,7 @@ Become an Early Riser for a one-time {{early_risers_price}} purchase. Available 
 
 If you delete your account, this benefit is permanently forfeited. Purchases are subject to store policies and applicable law.
 
-## Membership
+## Members
 
 Good connections start somewhere.
 

@@ -230,7 +230,7 @@ function navLinks(current) {
 }
 
 function shell({ slug, title, description, main, status = "published", canonicalPath = "/" }) {
-  const docTitle = slug === "home" ? "OnePlusOne — Dating, without the parenting part." : `${title} — OnePlusOne`;
+  const docTitle = slug === "home" ? "OnePlusOne > Dating, without the parenting part." : `${title} — OnePlusOne`;
   const canonical = `https://oneplusone.dating${canonicalPath === "/" ? "/" : canonicalPath}`;
   const launchHref = slug === "home" ? "#launch" : "/#launch";
   return `<!DOCTYPE html>
@@ -324,6 +324,7 @@ function homeMain(page, facts) {
   const membership = promote(byId.membership);
   const join = promote(byId["who-can-join"]);
   const launch = promote(byId["launch-news"]);
+  const safety = safetyArticles(byId.safety);
   const cards = mission.cards
     .map(
       (card) => `<article class="value"><h3>${escapeHtml(card.title)}</h3>${card.html}</article>`,
@@ -357,10 +358,10 @@ function homeMain(page, facts) {
         ${membership.html}
         <div class="tiers">
           <article class="tier featured">
-            <span class="badge">First ${escapeHtml(facts.first_light_cap)} per city</span>
             <h3>First Light</h3>
             <p class="price">Complimentary</p>
             <p>For the life of your account. No monthly fee.</p>
+            <span class="badge">First ${escapeHtml(facts.first_light_cap)} per city. Eligible, verified.</span>
           </article>
           <article class="tier">
             <h3>Early Risers</h3>
@@ -370,7 +371,7 @@ function homeMain(page, facts) {
           <article class="tier">
             <h3>Members</h3>
             <p class="price">${escapeHtml(facts.member_price)} <span>/ month</span></p>
-            <p>${escapeHtml(facts.trial)}</p>
+            <p>Discover people without children, match when interest is mutual, and start conversations.</p>
           </article>
         </div>
         <p class="fine">A First Light or Early Risers benefit is permanently forfeited if you delete your account. Purchases are subject to store policies and applicable law. Deleting your account does not cancel an App Store or Google Play subscription.</p>
@@ -381,7 +382,8 @@ function homeMain(page, facts) {
       </div></div></section>
       <section class="section sand" id="safety"><div class="wrap">
         <h2>${escapeHtml(byId.safety.title)}</h2>
-        <div class="safety-points">${safetyCards(byId.safety.html)}</div>
+        <div class="safety-points">${safety.articles}</div>
+        ${safety.note ? `<div class="safety-note">${safety.note}</div>` : ""}
       </div></section>
       <section class="section" id="launch"><div class="wrap"><div class="launch">
         <h2>${launch.title}</h2>
@@ -445,10 +447,22 @@ function pageHtml(page, facts) {
   });
 }
 
-function safetyCards(html) {
-  const points = [...html.matchAll(/<p>[\s\S]*?<\/p>/g)].map((match) => match[0]);
-  const rest = points.pop() || "";
-  return `${points.map((point) => `<article>${point}</article>`).join("")}${rest}`;
+function safetyArticles(section) {
+  const cards = section.cards.map((card) => ({ ...card }));
+  let note = section.html;
+  const last = cards.at(-1);
+  if (last && !note.trim()) {
+    const paras = [...last.html.matchAll(/<p>[\s\S]*?<\/p>/g)].map((match) => match[0]);
+    if (paras.length > 1 && paras.at(-1).includes("/guidelines")) {
+      note = paras.pop();
+      last.html = paras.join("");
+    }
+  }
+  if (cards.length !== 3) throw new Error("home safety needs three titled cards");
+  const articles = cards
+    .map((card) => `<article><h3>${escapeHtml(card.title)}</h3>${card.html}</article>`)
+    .join("");
+  return { articles, note };
 }
 
 function fillFacts(body, facts) {
@@ -534,7 +548,8 @@ await mkdir(join(distDir, "assets", "fonts"), { recursive: true });
 
 const cssBytes = await readFile(join(root, "assets", "site.css"));
 const jsBytes = await readFile(join(root, "assets", "site.js"));
-assetQuery = createHash("sha256").update(cssBytes).update(jsBytes).digest("hex").slice(0, 10);
+const sunBytes = await readFile(join(root, "assets", "sunrise.mjs"));
+assetQuery = createHash("sha256").update(cssBytes).update(jsBytes).update(sunBytes).digest("hex").slice(0, 10);
 
 for (const page of ordered) {
   const html = pageHtml(page, facts);
@@ -618,7 +633,14 @@ await writeFile(
 await writeFile(join(distDir, "_redirects"), "/delete /delete-account 301\n");
 
 await cp(join(root, "assets", "site.css"), join(distDir, "assets", "site.css"));
-await cp(join(root, "assets", "site.js"), join(distDir, "assets", "site.js"));
+const versionedJs = jsBytes.toString("utf8").replaceAll(
+  'from "./sunrise.mjs"',
+  `from "./sunrise.mjs?v=${assetQuery}"`,
+);
+if (!versionedJs.includes(`sunrise.mjs?v=${assetQuery}`)) {
+  throw new Error("site.js is missing the sunrise import to version");
+}
+await writeFile(join(distDir, "assets", "site.js"), versionedJs);
 await cp(join(root, "assets", "sunrise.mjs"), join(distDir, "assets", "sunrise.mjs"));
 for (const image of ["favicon.png", "apple-touch-icon.png", "og.png"]) {
   await cp(join(root, "assets", image), join(distDir, "assets", image));

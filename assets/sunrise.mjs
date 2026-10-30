@@ -131,8 +131,12 @@ export function mountSunrise(root) {
   root.innerHTML = sunriseSvg(width, { phase, glow: true, id: root.dataset.sunId || "hero-sun" });
   const lines = [...root.querySelectorAll("line")];
   const grads = lines.map((line) => root.querySelector(`#${line.getAttribute("stroke").slice(5, -1)}`));
+  let frameId = 0;
+  let running = false;
 
   const frame = (now) => {
+    frameId = 0;
+    if (!running) return;
     if (!started) started = now;
     if (!last) last = now;
     const elapsed = now - started;
@@ -151,7 +155,25 @@ export function mountSunrise(root) {
       });
     }
     last = now;
-    requestAnimationFrame(frame);
+    if (running) frameId = requestAnimationFrame(frame);
   };
-  requestAnimationFrame(frame);
+
+  const start = () => {
+    if (running) return;
+    running = true;
+    last = 0;
+    frameId = requestAnimationFrame(frame);
+  };
+  const stop = () => {
+    running = false;
+    if (frameId) cancelAnimationFrame(frameId);
+    frameId = 0;
+    last = 0;
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) start();
+    else stop();
+  });
+  observer.observe(root);
 }
