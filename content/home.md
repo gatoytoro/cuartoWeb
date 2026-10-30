@@ -1,6 +1,6 @@
 ---
 slug: home
-version: 2026-10-29.1
+version: 2026-10-29.2
 published_at: 2026-10-29
 locale: en
 title: OnePlusOne

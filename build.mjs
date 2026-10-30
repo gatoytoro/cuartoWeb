@@ -315,6 +315,119 @@ function promote(section) {
   return { title: match[1].replace(/<[^>]+>/g, ""), html: section.html.slice(match[0].length) };
 }
 
+function ico(paths, stroke) {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+}
+
+function productPreview() {
+  const pin = ico(`<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.2"/>`, "#FBD9BD");
+  const pass = ico(`<path d="M6 6l12 12M18 6L6 18"/>`, "#4B3E37");
+  const info = ico(`<circle cx="12" cy="12" r="8"/><path d="M12 11v5"/><circle cx="12" cy="8" r="1" fill="#7A685C" stroke="none"/>`, "#7A685C");
+  const heart = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 19.2S4.2 14.4 4.2 9.8A4 4 0 0 1 12 8a4 4 0 0 1 7.8 1.8c0 4.6-7.8 9.4-7.8 9.4z"/></svg>`;
+  const back = ico(`<path d="M14.5 6 8.5 12l6 6"/>`, "#2A211D");
+  const flag = ico(`<path d="M6 4v16M6 5h10l-2 3.5L16 12H6"/>`, "#C9434F");
+  const bag = ico(`<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6.5A2.5 2.5 0 0 1 11.5 4h1A2.5 2.5 0 0 1 15 6.5V8"/>`, "#B8432C");
+  const spark = ico(`<path d="m12 3 1.5 5.2L19 9.6l-5.5 1.6L12 16.5 10.5 11.2 5 9.6l5.5-1.4L12 3z"/>`, "#B8432C");
+  const chat = ico(`<path d="M5 6h14v8H9l-4 3V6z"/>`, "#fff");
+  const maren = `<img class="portrait" src="/assets/maren.jpg" alt="">`;
+  const adrian = `<img class="portrait" src="/assets/adrian.jpg" alt="">`;
+  const chips = ["Hiking", "Cooking", "Live music", "Reading"]
+    .map((label) => `<span class="glass-chip">${label}</span>`)
+    .join("");
+  return `<section class="section product" id="the-app" aria-labelledby="product-title"><div class="wrap">
+    <p class="kicker">The experience</p>
+    <h2 id="product-title">A little spark starts somewhere.</h2>
+    <p class="product-lede">Discover someone who catches your eye. Get to know the person behind the profile. And when the feeling is mutual, see where it goes.</p>
+    <div class="phones">
+      <figure class="phone">
+        <div class="phone-bezel" aria-hidden="true">
+          <div class="screen-discover">
+            <p class="app-kicker">Near you</p>
+            <p class="app-title">Discover</p>
+            <div class="deck">
+              <div class="deck-back"></div>
+              <div class="swipe">
+                ${maren}
+                <div class="swipe-shade"></div>
+                <div class="swipe-info">
+                  <p class="swipe-name">Maren, 34</p>
+                  <p class="swipe-sub">Architect · 5 ft 7 in</p>
+                  <p class="swipe-dist">${pin}<span>2 miles away</span></p>
+                  <div class="glass-chips">${chips}</div>
+                </div>
+              </div>
+            </div>
+            <div class="round-actions">
+              <span class="round pass">${pass}</span>
+              <span class="round info">${info}</span>
+              <span class="round like">${heart}</span>
+            </div>
+          </div>
+        </div>
+        <figcaption><strong>Discover</strong>Someone catches your eye.</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="phone-bezel" aria-hidden="true">
+          <div class="screen-profile">
+            <div class="profile-top"><span class="icon-btn">${back}</span><span class="icon-btn">${flag}</span></div>
+            <div class="profile-photo">
+              ${maren}
+              <div class="profile-shade"></div>
+              <div class="profile-info">
+                <p class="profile-name">Maren, 34</p>
+                <p class="profile-dist">${pin}<span>2 miles away</span></p>
+              </div>
+            </div>
+            <div class="profile-body">
+              <div class="mini-card">
+                <div class="fact"><span class="fact-ico">${bag}</span>Architect</div>
+                <div class="fact"><span class="fact-ico">${spark}</span>Studied architecture</div>
+              </div>
+              <span class="height-pill">5 ft 7 in</span>
+              <div class="mini-card">
+                <p class="app-kicker">About</p>
+                <p class="bio">Weeknight walks, a late table, and a joke that lands a second too late.</p>
+              </div>
+              <div class="kids-card">
+                <p class="app-kicker">Kids</p>
+                <p>Open to it</p>
+              </div>
+            </div>
+            <div class="profile-bar">
+              <span class="round pass">${pass}</span>
+              <span class="round like">${heart}</span>
+            </div>
+          </div>
+        </div>
+        <figcaption><strong>Profile</strong>There's always more to someone's story.</figcaption>
+      </figure>
+      <figure class="phone">
+        <div class="phone-bezel" aria-hidden="true">
+          <div class="screen-match">
+            <div class="match-stage">
+              <div class="match-sun">${sunriseSvg(148, { id: "match-sun" })}</div>
+              <div class="match-pair">
+                <div class="match-photo left">${adrian}</div>
+                <div class="match-photo right">${maren}</div>
+              </div>
+            </div>
+            <div class="match-copy">
+              <p class="app-kicker">It's mutual</p>
+              <p class="app-title">It's a match</p>
+              <p>You and Maren liked each other. Don't let the moment cool off.</p>
+            </div>
+            <div class="match-actions">
+              <span class="match-hello">${chat}<span>Say hello to Maren</span></span>
+              <span class="match-keep">Keep swiping</span>
+            </div>
+          </div>
+        </div>
+        <figcaption><strong>Match</strong>When the feeling is mutual.</figcaption>
+      </figure>
+    </div>
+  </div></section>`;
+}
+
 function homeMain(page, facts) {
   const byId = Object.fromEntries(groupSections(page.blocks).map((section) => [section.id, section]));
   for (const id of HOME_SECTIONS) {
@@ -343,6 +456,7 @@ function homeMain(page, facts) {
     </div>
     ${arc("#FFFCF8")}
     <div class="surface">
+      ${productPreview()}
       <section class="section" id="mission"><div class="wrap">
         <div class="mission-grid">
           <div>
@@ -642,7 +756,7 @@ if (!versionedJs.includes(`sunrise.mjs?v=${assetQuery}`)) {
 }
 await writeFile(join(distDir, "assets", "site.js"), versionedJs);
 await cp(join(root, "assets", "sunrise.mjs"), join(distDir, "assets", "sunrise.mjs"));
-for (const image of ["favicon.png", "apple-touch-icon.png", "og.png"]) {
+for (const image of ["favicon.png", "apple-touch-icon.png", "og.png", "maren.jpg", "adrian.jpg"]) {
   await cp(join(root, "assets", image), join(distDir, "assets", image));
 }
 for (const font of ["dm-sans-latin.woff2", "fraunces-latin.woff2", "fraunces-latin-italic.woff2"]) {
