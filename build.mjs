@@ -34,6 +34,60 @@ const POLICY = new Set(["guidelines", "terms", "privacy", "delete-account"]);
 const HAND = new Set(["help", "safety", "delete-account"]);
 const HOME_SECTIONS = ["mission", "membership", "who-can-join", "safety", "launch-news"];
 
+const STATES = [
+  ["AL", "Alabama"],
+  ["AK", "Alaska"],
+  ["AZ", "Arizona"],
+  ["AR", "Arkansas"],
+  ["CA", "California"],
+  ["CO", "Colorado"],
+  ["CT", "Connecticut"],
+  ["DE", "Delaware"],
+  ["DC", "District of Columbia"],
+  ["FL", "Florida"],
+  ["GA", "Georgia"],
+  ["HI", "Hawaii"],
+  ["ID", "Idaho"],
+  ["IL", "Illinois"],
+  ["IN", "Indiana"],
+  ["IA", "Iowa"],
+  ["KS", "Kansas"],
+  ["KY", "Kentucky"],
+  ["LA", "Louisiana"],
+  ["ME", "Maine"],
+  ["MD", "Maryland"],
+  ["MA", "Massachusetts"],
+  ["MI", "Michigan"],
+  ["MN", "Minnesota"],
+  ["MS", "Mississippi"],
+  ["MO", "Missouri"],
+  ["MT", "Montana"],
+  ["NE", "Nebraska"],
+  ["NV", "Nevada"],
+  ["NH", "New Hampshire"],
+  ["NJ", "New Jersey"],
+  ["NM", "New Mexico"],
+  ["NY", "New York"],
+  ["NC", "North Carolina"],
+  ["ND", "North Dakota"],
+  ["OH", "Ohio"],
+  ["OK", "Oklahoma"],
+  ["OR", "Oregon"],
+  ["PA", "Pennsylvania"],
+  ["RI", "Rhode Island"],
+  ["SC", "South Carolina"],
+  ["SD", "South Dakota"],
+  ["TN", "Tennessee"],
+  ["TX", "Texas"],
+  ["UT", "Utah"],
+  ["VT", "Vermont"],
+  ["VA", "Virginia"],
+  ["WA", "Washington"],
+  ["WV", "West Virginia"],
+  ["WI", "Wisconsin"],
+  ["WY", "Wyoming"],
+];
+
 const MONTHS = [
   "January",
   "February",
@@ -502,12 +556,18 @@ function homeMain(page, facts) {
       <section class="section" id="launch"><div class="wrap"><div class="launch">
         <h2>${launch.title}</h2>
         ${launch.html}
-        <form class="launch-form">
+        <form class="launch-form" id="launch-form" novalidate>
           <label class="skip" for="launch-email">Email</label>
-          <input id="launch-email" type="email" name="email" placeholder="you@example.com" disabled>
-          <button class="button" type="button" disabled>Notify me</button>
+          <input id="launch-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" maxlength="50" required>
+          <label class="skip" for="launch-state">State</label>
+          <select id="launch-state" name="state" autocomplete="address-level1" required>
+            <option value="" selected disabled>State</option>
+            ${STATES.map(([code, name]) => `<option value="${code}">${escapeHtml(name)}</option>`).join("")}
+          </select>
+          <button class="button" type="submit">Notify me</button>
         </form>
-        <p class="fine">Launch news is not being collected yet. When it is, we will only use your email to say when OnePlusOne opens in your city.</p>
+        <p id="launch-status" class="launch-status" role="status" hidden></p>
+        <p class="fine">We'll use your email only for that notice, when OnePlusOne is coming near you soon. We won't send any other mail.</p>
         <p class="pills"><span>App Store · coming soon</span><span>Google Play · coming soon</span></p>
       </div></div></section>
     </div>
@@ -653,6 +713,13 @@ if (!bySlug.about.body.includes("Dating, without the parenting part.")) throw ne
 if (!bySlug["delete-account"].body.includes("does not cancel an active subscription")) {
   throw new Error("delete page lost the subscription warning");
 }
+if (STATES.length !== 51) throw new Error("launch state list must be the 50 states and DC");
+if (!bySlug.home.body.includes("Leave your email and your state.")) {
+  throw new Error("home lost the launch state line");
+}
+if (!bySlug.privacy.body.includes("No other mail is sent to that address.")) {
+  throw new Error("privacy lost the launch mail limit");
+}
 
 const ordered = REQUIRED.map((slug) => bySlug[slug]);
 
@@ -738,7 +805,7 @@ await writeFile(
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
-  Content-Security-Policy: default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self'; style-src 'self'; font-src 'self'; script-src 'self'; connect-src 'self' https://api.oneplusone.dating; base-uri 'none'; frame-ancestors 'none'
 
 /assets/*
   Cache-Control: public, max-age=604800

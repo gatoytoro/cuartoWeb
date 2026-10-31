@@ -597,7 +597,8 @@ body {
   flex-wrap: wrap;
   margin-top: 16px;
 }
-.launch-form input {
+.launch-form input,
+.launch-form select {
   flex: 1 1 220px;
   min-height: 52px;
   border-radius: 999px;
@@ -605,8 +606,18 @@ body {
   background: var(--cream);
   padding: 0 18px;
   font: inherit;
+  color: var(--ink);
+}
+.launch-form input::placeholder,
+.launch-form select:invalid {
   color: var(--muted);
 }
+.launch-status {
+  margin: 14px 0 0;
+  font-weight: 700;
+  color: var(--heading);
+}
+.launch-status.is-error { color: var(--ember); }
 .pills { display: flex; gap: 10px; flex-wrap: wrap; }
 .pills span {
   border-radius: 999px;

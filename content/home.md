@@ -1,7 +1,7 @@
 ---
 slug: home
-version: 2026-10-29.2
-published_at: 2026-10-29
+version: 2026-10-30.1
+published_at: 2026-10-30
 locale: en
 title: OnePlusOne
 status: published
@@ -63,4 +63,4 @@ The full list is on the [Community Guidelines](/guidelines).
 
 Be there at first light.
 
-Leave your email and we will tell you when OnePlusOne opens in your city.
+Leave your email and your state. We'll tell you when OnePlusOne is coming near you soon.

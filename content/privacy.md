@@ -1,7 +1,7 @@
 ---
 slug: privacy
-version: 2026-10-26.1
-published_at: 2026-10-26
+version: 2026-10-30.1
+published_at: 2026-10-30
 locale: en
 title: Privacy Policy (draft)
 status: draft
@@ -56,6 +56,10 @@ The finished policy has to name every company that receives member information, 
 Deleting an account removes the profile and matches from the dating experience, ends OnePlusOne access, and starts deletion of account data. The retention schedule — what is deleted, what is kept, and for how long — is not published yet. It has to be written before this draft can become the Privacy Policy.
 
 What deletion does to access, matches, and founding benefits is explained on [Delete account](/delete-account).
+
+## Launch news
+
+The homepage collects an email address and a US state. The address and state are kept so one notice can be sent when OnePlusOne is coming near that person soon. No other mail is sent to that address.
 
 ## Privacy requests
 
