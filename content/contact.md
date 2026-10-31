@@ -1,17 +1,21 @@
 ---
 slug: contact
-version: 2026-10-26.1
-published_at: 2026-10-26
+version: 2026-10-30.1
+published_at: 2026-10-30
 locale: en
 title: Contact
-status: draft
-description: OnePlusOne support contact is not published yet.
-summary: A public support address is not published yet.
+status: published
+description: Email OnePlusOne support.
+summary: Email support@oneplusone.dating.
 ---
 
-> Draft. A public support address is not published yet.
+## Email
 
-Until a support address is published, these pages answer the questions members ask first:
+Write to [support@oneplusone.dating](mailto:support@oneplusone.dating).
+
+That address is for help with the service. The launch list is separate. It receives only the notice when OnePlusOne is coming near you.
+
+## Before you write
 
 - [Help](/help) covers eligibility, First Light, Early Risers, the monthly membership, and subscription cancellation.
 - [Safety](/safety) covers photos, privacy, reporting, and blocks.

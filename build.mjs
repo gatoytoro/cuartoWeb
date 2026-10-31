@@ -114,6 +114,7 @@ function escapeHtml(value) {
 function safeUrl(url) {
   if (url.startsWith("/") && !url.startsWith("//") && !url.includes("\\")) return url;
   if (url.startsWith("https://") && !url.includes(" ")) return url;
+  if (/^mailto:[^\s?]+@[^\s?]+\.[^\s?]+$/.test(url)) return url;
   return null;
 }
 
@@ -708,7 +709,7 @@ for (const slug of ["terms", "privacy"]) {
   if (bySlug[slug].status !== "draft") throw new Error(`${slug} must stay a draft`);
   if (!bySlug[slug].body.startsWith("> Draft for review.")) throw new Error(`${slug} is missing its draft notice`);
 }
-if (!bySlug.contact.body.includes("not published yet")) throw new Error("contact page needs the unpublished notice");
+if (!bySlug.contact.body.includes("support@oneplusone.dating")) throw new Error("contact page needs the support address");
 if (!bySlug.about.body.includes("Dating, without the parenting part.")) throw new Error("about page lost its tagline");
 if (!bySlug["delete-account"].body.includes("does not cancel an active subscription")) {
   throw new Error("delete page lost the subscription warning");

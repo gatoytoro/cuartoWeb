@@ -1,6 +1,6 @@
 ---
 slug: privacy
-version: 2026-10-30.1
+version: 2026-10-30.2
 published_at: 2026-10-30
 locale: en
 title: Privacy Policy (draft)
@@ -63,4 +63,4 @@ The homepage collects an email address and a US state. The address and state are
 
 ## Privacy requests
 
-The finished policy has to explain how to make a privacy request. A public contact address is not published yet. See [Contact](/contact).
+The finished policy has to explain how to make a privacy request. Send a privacy request to [support@oneplusone.dating](mailto:support@oneplusone.dating). See [Contact](/contact).
